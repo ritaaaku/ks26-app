@@ -28,7 +28,7 @@ spec:
           # Placeholder account/tag: replace with the real Docker Hub
           # account and the tag copied from the build board (README step
           # 5) before shipping.
-          image: docker.io/REPLACE_DOCKERHUB_USER/ks26-app:group1-REPLACE_SHA
+          image: docker.io/REPLACE_DOCKERHUB_USER/ks26-app:group1-6a47ac0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
