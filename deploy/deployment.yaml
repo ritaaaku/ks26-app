@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ks26-app
+  labels:
+    app.kubernetes.io/name: ks26-app
+    app.kubernetes.io/part-of: ks26
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ks26-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ks26-app
+        app.kubernetes.io/part-of: ks26
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ks26-app
+          # Tag is the commit SHA, unique and never reused.
+          # Placeholder account/tag: replace with the real Docker Hub
+          # account and the tag copied from the build board (README step
+          # 5) before shipping.
+          image: docker.io/REPLACE_DOCKERHUB_USER/ks26-app:group1-REPLACE_SHA
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          # All configuration is injected from the ConfigMap; switching
+          # environments never requires rebuilding the image.
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ks26-app-config
+                  key: PORT
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ks26-app-config
+                  key: APP_NAME
+            - name: APP_OWNER
+              valueFrom:
+                configMapKeyRef:
+                  name: ks26-app-config
+                  key: APP_OWNER
+            - name: IMAGE_TAG
+              valueFrom:
+                configMapKeyRef:
+                  name: ks26-app-config
+                  key: IMAGE_TAG
+            - name: INFERENCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ks26-app-config
+                  key: INFERENCE_URL
+            - name: INFERENCE_TIMEOUT_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: ks26-app-config
+                  key: INFERENCE_TIMEOUT_SECONDS
+            - name: DEGRADED_MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: ks26-app-config
+                  key: DEGRADED_MESSAGE
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+          securityContext:
+            privileged: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL

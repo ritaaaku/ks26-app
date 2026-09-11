@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ks26-app-config
+  labels:
+    app.kubernetes.io/name: ks26-app
+    app.kubernetes.io/part-of: ks26
+data:
+  # The single HTTP port. deployment's containerPort and service's
+  # targetPort both point at this same value.
+  PORT: "8080"
+  APP_NAME: "ks26 內部知識問答"
+  # Real, reachable owner so there is someone to page when this breaks.
+  APP_OWNER: "ritaaaku"
+  # Shown on the page footer so the deployed tag is visible at a glance.
+  # Placeholder: replace with the real tag copied from the build board
+  # (README step 5) before shipping. Underscore, not hyphen, on purpose.
+  IMAGE_TAG: "group1-REPLACE_SHA"
+  # Inference backend address. Empty = no backend configured; the service
+  # stays healthy and answers with a labeled degraded reply.
+  INFERENCE_URL: ""
+  INFERENCE_TIMEOUT_SECONDS: "5"
+  DEGRADED_MESSAGE: "目前沒有可用的推論後端，這是降級回覆：問題已收到，但暫時無法產生答案，請稍後再試。"
